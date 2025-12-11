@@ -28,7 +28,7 @@ export const register = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_TOKEN);
 
-        const isProduction = process.env.NODE_ENV === "production";
+        const isProduction = process.env.NODE_ENV === "Production";
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -83,7 +83,7 @@ export const login = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_TOKEN);
 
-        const isProduction = process.env.NODE_ENV === "production";
+        const isProduction = process.env.NODE_ENV === "Production";
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -101,7 +101,7 @@ export const login = async (req, res) => {
 // LOGOUT  (✔ FIXED VERSION)
 export const logout = (req, res) => {
     try {
-        const isProduction = process.env.NODE_ENV === "production";
+        const isProduction = process.env.NODE_ENV === "Production";
 
         res.clearCookie("token", {
             httpOnly: true,
