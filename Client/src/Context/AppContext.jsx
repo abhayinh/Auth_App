@@ -30,7 +30,7 @@ export const AppContextProvider = ({ children }) => {
   const getauth = async () => {
     try {
       const { data } = await axios.get(
-        `${backendurl}/api/auth/islogin`,
+        `${backendurl}/api/auth/isauthenticated`,
         { withCredentials: true }
       );
 

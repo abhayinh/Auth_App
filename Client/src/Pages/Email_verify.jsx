@@ -30,7 +30,7 @@ function Email_verify() {
 
     try {
       const { data } = await axios.post(
-        `${backendurl}/api/auth/verifyaccount`,
+        `${backendurl}/api/auth/verifyemail`,
         { otp },
         { withCredentials: true }
       );

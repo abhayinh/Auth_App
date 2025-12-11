@@ -35,7 +35,7 @@ function Reset_password() {
 
     try {
       const { data } = await axios.post(
-        `${backendurl}/api/auth/send_reset_otp`,
+        `${backendurl}/api/auth/sendresetotp`,
         { email },
         { withCredentials: true }
       );
