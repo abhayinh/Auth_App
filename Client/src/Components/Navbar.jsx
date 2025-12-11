@@ -12,48 +12,48 @@ function Navbar() {
 
   if (loading) return null;
 
-  // SEND VERIFY OTP
+  // SEND VERIFY OTP (protected route: expects userid and cookie)
   const sendverifyotp = async () => {
     try {
+      if (!userdata?._id) {
+        toast.error("User data not available");
+        return;
+      }
       const { data } = await axios.post(
-        backendurl + "/api/auth/sendverifyotp",
-        { userid: userdata._id },
-        { withCredentials: true }
+        `${backendurl}/api/auth/sendverifyotp`,
+        { userid: userdata._id } // backend expects userid in body
       );
 
       if (data.success) {
         toast.success(data.message);
         navigate("/Email_verify");
       } else {
-        toast.error(data.message);
+        toast.error(data.message || "Unable to send verification OTP");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
   // LOGOUT
   const Logout = async () => {
     try {
-      const { data } = await axios.post(
-        backendurl + "/api/auth/logout",
-        {},
-        { withCredentials: true }
-      );
-
+      const { data } = await axios.post(`${backendurl}/api/auth/logout`, {});
       if (data.success) {
         setislogin(false);
         setuserdata(null);
         navigate("/");
+      } else {
+        toast.error(data.message || "Logout failed");
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
   return (
     <div className="w-full flex justify-between p-4 sm:p-6 sm:px-24 absolute top-0 items-center">
-      <img src={assets.logo} alt="" className="w-28 sm:w-32" />
+      <img src={assets.logo} alt="logo" className="w-28 sm:w-32" />
 
       {userdata ? (
         <div className="w-10 h-10 flex items-center justify-center rounded-full bg-black text-white font-bold relative group">
@@ -87,7 +87,7 @@ function Navbar() {
           onClick={() => navigate("/login")}
           className="flex items-center gap-2 border border-gray-500 rounded-full px-6 py-2 text-gray-800 hover:bg-gray-100 transition-all"
         >
-          Login <img src={assets.arrow_icon} alt="" />
+          Login <img src={assets.arrow_icon} alt="arrow" />
         </button>
       )}
     </div>

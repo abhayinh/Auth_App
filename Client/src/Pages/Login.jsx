@@ -21,8 +21,7 @@ function Login() {
       if (state === "signup") {
         const { data } = await axios.post(
           `${backendurl}/api/auth/register`,
-          { name, email, password },
-          { withCredentials: true }
+          { name, email, password }
         );
 
         if (data.success) {
@@ -32,13 +31,11 @@ function Login() {
         } else {
           toast.error(data.message || "Signup failed");
         }
-
       } else {
-        const { data } = await axios.post(
-          `${backendurl}/api/auth/login`,
-          { email, password },
-          { withCredentials: true }
-        );
+        const { data } = await axios.post(`${backendurl}/api/auth/login`, {
+          email,
+          password,
+        });
 
         if (data.success) {
           setislogin(true);
@@ -48,7 +45,6 @@ function Login() {
           toast.error(data.message || "Invalid email or password");
         }
       }
-
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");
     }
@@ -60,6 +56,7 @@ function Login() {
         onClick={() => navigate("/")}
         src={assets.logo}
         className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
+        alt="logo"
       />
 
       <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm">
@@ -67,9 +64,7 @@ function Login() {
           {state === "signup" ? "Create Account" : "Login"}
         </h2>
         <p className="text-center text-sm mb-6">
-          {state === "signup"
-            ? "Create your account"
-            : "Login to your account"}
+          {state === "signup" ? "Create your account" : "Login to your account"}
         </p>
 
         <form onSubmit={onsubmithandle}>

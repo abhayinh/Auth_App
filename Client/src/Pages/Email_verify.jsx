@@ -29,11 +29,11 @@ function Email_verify() {
     const otp = inputrefs.current.map((i) => i.value).join("");
 
     try {
-      const { data } = await axios.post(
-        `${backendurl}/api/auth/verifyemail`,
-        { otp },
-        { withCredentials: true }
-      );
+      // backend route is: POST /api/auth/verifyaccount (protected)
+      const { data } = await axios.post(`${backendurl}/api/auth/verifyaccount`, {
+        userid: userdata?._id,
+        otp,
+      });
 
       if (data.success) {
         toast.success(data.message);
@@ -43,7 +43,7 @@ function Email_verify() {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -51,7 +51,7 @@ function Email_verify() {
     if (islogin && userdata?.isaccountverify) {
       navigate("/");
     }
-  }, [islogin, userdata]);
+  }, [islogin, userdata, navigate]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-200 to-purple-400">
@@ -59,6 +59,7 @@ function Email_verify() {
         src={assets.logo}
         onClick={() => navigate("/")}
         className="absolute left-5 top-5 w-28 cursor-pointer"
+        alt="logo"
       />
 
       <form onSubmit={onsubmithandler} className="bg-slate-900 p-8 rounded-lg w-96">

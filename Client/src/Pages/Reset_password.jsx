@@ -1,4 +1,4 @@
-import  { useState, useRef, useContext } from "react";
+import { useState, useRef, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { assets } from "../assets/assets";
 import { AppContext } from "../Context/AppContext";
@@ -34,16 +34,15 @@ function Reset_password() {
     e.preventDefault();
 
     try {
-      const { data } = await axios.post(
-        `${backendurl}/api/auth/sendresetotp`,
-        { email },
-        { withCredentials: true }
-      );
+      // backend public route is /api/auth/send_reset_otp
+      const { data } = await axios.post(`${backendurl}/api/auth/send_reset_otp`, {
+        email,
+      });
 
       data.success ? toast.success(data.message) : toast.error(data.message);
       if (data.success) setisemailsent(true);
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -59,16 +58,16 @@ function Reset_password() {
     e.preventDefault();
 
     try {
-      const { data } = await axios.post(
-        `${backendurl}/api/auth/reset_password`,
-        { email, otp, newpassword },
-        { withCredentials: true }
-      );
+      const { data } = await axios.post(`${backendurl}/api/auth/reset_password`, {
+        email,
+        otp,
+        newpassword,
+      });
 
       data.success ? toast.success(data.message) : toast.error(data.message);
       if (data.success) navigate("/");
     } catch (error) {
-      toast.error(error.message);
+      toast.error(error.response?.data?.message || error.message);
     }
   };
 
@@ -78,6 +77,7 @@ function Reset_password() {
         src={assets.logo}
         onClick={() => navigate("/")}
         className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
+        alt="logo"
       />
 
       {!isemailsent && (
@@ -85,7 +85,7 @@ function Reset_password() {
           <h1 className="text-white text-2xl text-center mb-4">Reset Password</h1>
 
           <div className="mb-4 flex items-center gap-3 w-full px-5 py-2 rounded-full bg-[#333A5C]">
-            <img src={assets.mail_icon} className="w-3 h-3" />
+            <img src={assets.mail_icon} className="w-3 h-3" alt="mail" />
             <input
               type="email"
               placeholder="Email Id"
@@ -133,7 +133,7 @@ function Reset_password() {
           <h1 className="text-white text-2xl text-center mb-4">New Password</h1>
 
           <div className="mb-4 flex items-center gap-3 w-full px-5 py-2 rounded-full bg-[#333A5C]">
-            <img src={assets.lock_icon} className="w-3 h-3" />
+            <img src={assets.lock_icon} className="w-3 h-3" alt="lock" />
             <input
               type="password"
               placeholder="New Password"

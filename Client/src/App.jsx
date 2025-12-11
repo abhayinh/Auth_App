@@ -1,28 +1,24 @@
-import {  Route, Routes } from "react-router-dom"
+import { Route, Routes } from "react-router-dom";
 import Home from "./Pages/Home.jsx";
 import Login from "./Pages/Login.jsx";
 import Email_verify from "./Pages/Email_verify.jsx";
 import Reset_password from "./Pages/Reset_password.jsx";
-import { ToastContainer } from 'react-toastify';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-function App(){
-
-    return<>
-
-    <ToastContainer/>
-    <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path="/Login" element={<Login/>}/>
-        <Route path="/Email_verify" element={<Email_verify/>}/>
-        <Route path="/Reset_password" element={<Reset_password/>}/>
-    </Routes>
-
-
-
+function App() {
+  return (
+    <>
+      <ToastContainer />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/Email_verify" element={<Email_verify />} />
+        <Route path="/Reset_password" element={<Reset_password />} />
+      </Routes>
     </>
-
-
+  );
 }
 
-
-export default App
+export default App;
+    
