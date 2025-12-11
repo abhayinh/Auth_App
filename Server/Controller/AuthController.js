@@ -5,6 +5,23 @@ import transporter from "../Config/Nodemailer.js"
 import { EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE } from "../Config/EmailTemplete.js";
 
 // REGISTER
+// REGISTER
+
+
+console.log('=== REGISTER REQUEST ===');
+console.log('NODE_ENV:', process.env.NODE_ENV);
+console.log('Origin:', req.headers.origin);
+console.log('Body:', { name, email, password: '***' });
+
+// After setting cookie, add:
+console.log('Cookie set with settings:', {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    isProduction
+});
+
+
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -34,16 +51,23 @@ export const register = async (req, res) => {
             httpOnly: true,
             secure: isProduction,
             sameSite: isProduction ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
+        // Send email asynchronously without blocking the response
         const sendmail = {
             from: process.env.SENDER_EMAIL,
             to: email,
             subject: "Welcome to Our Website",
             text: "Special thank you for creating an account!",
         };
-        await transporter.sendMail(sendmail);
+        
+        // Don't await - send in background
+        transporter.sendMail(sendmail).catch(err => {
+            console.error('Email send error:', err);
+        });
 
+        // Return success immediately
         return res.json({ success: true });
 
     } catch (err) {
