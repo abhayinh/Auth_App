@@ -16,14 +16,16 @@ import userroute from "./Routes/User_route.js"
 
 const allowedorigins = [
   "http://localhost:5173",
-  "https://auth-app-gamma-five.vercel.app"  
+  "https://auth-app-gamma-five.vercel.app",  
 ];
-
 
 const app=express()
 app.use(express.json())
 app.use(cookieParser())
-app.use(cors({origin:allowedorigins,credentials:true}))
+app.use(cors({
+  origin: allowedorigins,
+  credentials: true
+}));
 
 
 
