@@ -1,154 +1,70 @@
-import { useContext, useState } from "react";
-import { assets } from "../assets/assets";
-import { useNavigate } from "react-router-dom";
-import { AppContext } from "../Context/AppContext";
 import axios from "axios";
-import { toast } from "react-toastify";
+import { createContext, useState, useEffect } from "react";
 
-function Login() {
-  const navigate = useNavigate();
-  const { backendurl, setislogin,getuserdata } = useContext(AppContext);
+export const AppContext = createContext();
 
-  const [state, setstate] = useState("signup");
-  const [name, setname] = useState("");
-  const [email, setemail] = useState("");
-  const [password, setpassword] = useState("");
+export const AppContextProvider = ({ children }) => {
+  const backendurl = import.meta.env.VITE_BACKEND_URL;
+  const [islogin, setislogin] = useState(false);
+  const [userdata, setuserdata] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const onsubmithandle = async (e) => {
-    e.preventDefault();
-
+  const getuserdata = async () => {
     try {
-      axios.defaults.withCredentials = true;
+      const { data } = await axios.get(
+        `${backendurl}/api/user/data`,
+        { withCredentials: true }
+      );
 
-      if (state === "signup") {
-        const { data } = await axios.post(`${backendurl}/api/auth/register`, {
-          name,
-          email,
-          password,
-        });
-
-        if (data.success) {
-          setislogin(true);
-          getuserdata()
-          navigate("/");
-        } else {
-          toast.error(data.message || "Signup failed");
-        }
+      if (data.success) {
+        setuserdata(data.userdata);
       } else {
-        const { data } = await axios.post(`${backendurl}/api/auth/login`, {
-          email,
-          password,
-        });
-
-        if (data.success) {
-          setislogin(true);
-          getuserdata()
-          navigate("/");
-        } else {
-          toast.error(data.message || "Invalid email or password");
-        }
+        setuserdata(null);
       }
+
     } catch (error) {
-      toast.error(error.response?.data?.message || "Something went wrong");
+      setuserdata(null);
     }
   };
 
-  return (
-    <div className="flex items-center justify-center min-h-screen px-6 sm:px-0 bg-gradient-to-br from-blue-200 to-purple-400">
-      <img
-        onClick={() => navigate("/")}
-        src={assets.logo}
-        className="absolute left-5 sm:left-20 top-5 w-28 sm:w-32 cursor-pointer"
-      />
+  const getauth = async () => {
+    try {
+      const { data } = await axios.get(
+        `${backendurl}/api/auth/islogin`,
+        { withCredentials: true }
+      );
 
-      <div className="bg-slate-900 p-10 rounded-lg shadow-lg w-full sm:w-96 text-indigo-300 text-sm">
-        <h2 className="text-3xl font-semibold text-white text-center mb-3">
-          {state === "signup" ? "Create Account" : "Login"}
-        </h2>
-        <p className="text-center text-sm mb-6">
-          {state === "signup"
-            ? "Create your account"
-            : "Login to your account"}
-        </p>
+      if (data.success) {
+        setislogin(true);
+        await getuserdata();
+      } else {
+        setislogin(false);
+        setuserdata(null);
+      }
 
-        <form onSubmit={onsubmithandle}>
-          {state === "signup" && (
-            <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-              <img src={assets.person_icon} alt="" />
-              <input
-                onChange={(e) => setname(e.target.value)}
-                value={name}
-                className="bg-transparent outline-none text-gray-200 w-full"
-                type="text"
-                placeholder="Enter Name"
-                required
-              />
-            </div>
-          )}
+    } catch (error) {
+      setislogin(false);
+      setuserdata(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-          <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-            <img src={assets.mail_icon} alt="" />
-            <input
-              onChange={(e) => setemail(e.target.value)}
-              value={email}
-              className="bg-transparent outline-none text-gray-200 w-full"
-              type="email"
-              placeholder="Enter Email"
-              required
-            />
-          </div>
+  useEffect(() => {
+    getauth();
+  }, []);
 
-          <div className="mb-4 flex items-center gap-3 w-full px-5 py-2.5 rounded-full bg-[#333A5C]">
-            <img src={assets.lock_icon} alt="" />
-            <input
-              onChange={(e) => setpassword(e.target.value)}
-              value={password}
-              className="bg-transparent outline-none text-gray-200 w-full"
-              type="password"
-              placeholder="Enter Password"
-              required
-            />
-          </div>
+  const value = {
+    backendurl,
+    islogin,
+    setislogin,
+    userdata,
+    setuserdata,
+    getuserdata,
+    loading,
+  };
 
-          <p
-            onClick={() => navigate("/Reset_password")}
-            className="mb-4 text-indigo-500 cursor-pointer"
-          >
-            Forgot password?
-          </p>
-
-          <button
-            type="submit"
-            className="w-full py-2.5 rounded-full bg-gradient-to-r from-indigo-500 to-indigo-900 text-white font-medium"
-          >
-            {state === "signup" ? "Sign Up" : "Login"}
-          </button>
-        </form>
-
-        {state === "signup" ? (
-          <p className="text-gray-400 text-center text-xs mt-4">
-            Already have an account?
-            <span
-              onClick={() => setstate("login")}
-              className="ml-2 text-blue-400 cursor-pointer underline"
-            >
-              Login here
-            </span>
-          </p>
-        ) : (
-          <p className="text-gray-400 text-center text-xs mt-4">
-            Don’t have an account?
-            <span
-              onClick={() => setstate("signup")}
-              className="ml-2 text-blue-400 cursor-pointer underline"
-            >
-              Create account
-            </span>
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default Login;
+  return <AppContext.Provider value={value}>
+    {!loading && children}
+  </AppContext.Provider>;
+};

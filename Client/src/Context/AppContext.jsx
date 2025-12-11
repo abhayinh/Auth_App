@@ -11,35 +11,38 @@ export const AppContextProvider = ({ children }) => {
 
   const getuserdata = async () => {
     try {
-      const { data } = await axios.get(`${backendurl}/api/user/data`, { withCredentials: true });
+      const { data } = await axios.get(
+        `${backendurl}/api/user/data`,
+        { withCredentials: true }
+      );
+
       if (data.success) {
         setuserdata(data.userdata);
       } else {
         setuserdata(null);
       }
+
     } catch (error) {
-      // Don't toast on 401 (expected when logged out)
-      if (error.response?.status !== 401) {
-        console.error("User data fetch error:", error);
-      }
       setuserdata(null);
     }
   };
 
   const getauth = async () => {
     try {
-      const { data } = await axios.get(`${backendurl}/api/auth/islogin`, { withCredentials: true });
+      const { data } = await axios.get(
+        `${backendurl}/api/auth/islogin`,
+        { withCredentials: true }
+      );
+
       if (data.success) {
         setislogin(true);
-        await getuserdata(); // ensures user data loads before finishing
+        await getuserdata();
       } else {
         setislogin(false);
         setuserdata(null);
       }
+
     } catch (error) {
-      if (error.response?.status !== 401) {
-        console.error("Auth error:", error);
-      }
       setislogin(false);
       setuserdata(null);
     } finally {
@@ -61,5 +64,7 @@ export const AppContextProvider = ({ children }) => {
     loading,
   };
 
-  return <AppContext.Provider value={value}>{!loading && children}</AppContext.Provider>;
+  return <AppContext.Provider value={value}>
+    {!loading && children}
+  </AppContext.Provider>;
 };
