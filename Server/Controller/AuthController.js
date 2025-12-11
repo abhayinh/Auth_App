@@ -5,23 +5,6 @@ import transporter from "../Config/Nodemailer.js"
 import { EMAIL_VERIFY_TEMPLATE, PASSWORD_RESET_TEMPLATE } from "../Config/EmailTemplete.js";
 
 // REGISTER
-// REGISTER
-
-
-console.log('=== REGISTER REQUEST ===');
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('Origin:', req.headers.origin);
-console.log('Body:', { name, email, password: '***' });
-
-// After setting cookie, add:
-console.log('Cookie set with settings:', {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: isProduction ? "none" : "lax",
-    isProduction
-});
-
-
 export const register = async (req, res) => {
     const { name, email, password } = req.body;
 
@@ -30,6 +13,10 @@ export const register = async (req, res) => {
     }
 
     try {
+        console.log('=== REGISTER REQUEST ===');
+        console.log('NODE_ENV:', process.env.NODE_ENV);
+        console.log('Origin:', req.headers.origin);
+
         const existing_user = await usermodel.findOne({ email });
 
         if (existing_user) {
@@ -47,6 +34,13 @@ export const register = async (req, res) => {
 
         const isProduction = process.env.NODE_ENV === "Production";
 
+        console.log('Setting cookie with:', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            isProduction
+        });
+
         res.cookie("token", token, {
             httpOnly: true,
             secure: isProduction,
@@ -54,7 +48,7 @@ export const register = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
-        // Send email asynchronously without blocking the response
+        // Send email asynchronously - don't block response
         const sendmail = {
             from: process.env.SENDER_EMAIL,
             to: email,
@@ -62,15 +56,15 @@ export const register = async (req, res) => {
             text: "Special thank you for creating an account!",
         };
         
-        // Don't await - send in background
         transporter.sendMail(sendmail).catch(err => {
-            console.error('Email send error:', err);
+            console.error('Welcome email error (non-critical):', err.message);
         });
 
-        // Return success immediately
+        console.log('Registration successful, cookie set');
         return res.json({ success: true });
 
     } catch (err) {
+        console.error('Registration error:', err);
         return res.json({ success: false, message: err.message });
     }
 };
@@ -87,6 +81,10 @@ export const login = async (req, res) => {
     }
 
     try {
+        console.log('=== LOGIN REQUEST ===');
+        console.log('NODE_ENV:', process.env.NODE_ENV);
+        console.log('Origin:', req.headers.origin);
+
         const user = await usermodel.findOne({ email });
 
         if (!user) {
@@ -109,23 +107,39 @@ export const login = async (req, res) => {
 
         const isProduction = process.env.NODE_ENV === "Production";
 
+        console.log('Setting cookie with:', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax",
+            isProduction
+        });
+
         res.cookie("token", token, {
             httpOnly: true,
             secure: isProduction,
             sameSite: isProduction ? "none" : "lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
         });
 
+        console.log('Login successful, cookie set');
         return res.json({ success: true });
 
     } catch (err) {
+        console.error('Login error:', err);
         return res.json({ success: false, message: err.message });
     }
 };
 
-// LOGOUT  (✔ FIXED VERSION)
+// LOGOUT
 export const logout = (req, res) => {
     try {
         const isProduction = process.env.NODE_ENV === "Production";
+
+        console.log('Clearing cookie with:', {
+            httpOnly: true,
+            secure: isProduction,
+            sameSite: isProduction ? "none" : "lax"
+        });
 
         res.clearCookie("token", {
             httpOnly: true,
@@ -173,14 +187,19 @@ export const sendverifyotp = async (req, res) => {
             html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email)
         };
 
-        await transporter.sendMail(mailoption);
+        // Send email asynchronously
+        transporter.sendMail(mailoption)
+            .then(() => console.log('Verification email sent successfully'))
+            .catch(err => console.error('Verification email error:', err.message));
 
+        // Return success immediately
         res.json({
             success: true,
             message: "Verification mail sent to your email"
         });
 
     } catch (err) {
+        console.error('Send verify OTP error:', err);
         res.json({ success: false, message: err.message });
     }
 };
@@ -255,35 +274,48 @@ export const sendresetotp = async (req, res) => {
         return res.json({ success: false, message: "Email is required" });
     }
 
-    const user = await usermodel.findOne({ email });
+    try {
+        const user = await usermodel.findOne({ email });
 
-    if (!user) {
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        const otp = Math.floor(100000 + Math.random() * 900000);
+
+        user.resetotp = otp;
+        user.resetotpexpiryat = Date.now() + 15 * 60 * 1000;
+
+        await user.save();
+
+        const mail = {
+            from: process.env.SENDER_EMAIL,
+            to: user.email,
+            subject: "Reset Password OTP",
+            html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email)
+        };
+
+        // Send email asynchronously
+        transporter.sendMail(mail)
+            .then(() => console.log('Reset OTP email sent successfully'))
+            .catch(err => console.error('Reset OTP email error:', err.message));
+
+        // Return success immediately
+        return res.json({
+            success: true,
+            message: `OTP sent to ${user.email}`
+        });
+
+    } catch (error) {
+        console.error('Send reset OTP error:', error);
         return res.json({
             success: false,
-            message: "User not found"
+            message: error.message
         });
     }
-
-    const otp = Math.floor(100000 + Math.random() * 900000);
-
-    user.resetotp = otp;
-    user.resetotpexpiryat = Date.now() + 15 * 60 * 1000;
-
-    await user.save();
-
-    const mail = {
-        from: process.env.SENDER_EMAIL,
-        to: user.email,
-        subject: "Reset Password OTP",
-        html: PASSWORD_RESET_TEMPLATE.replace("{{otp}}", otp).replace("{{email}}", user.email)
-    };
-
-    await transporter.sendMail(mail);
-
-    return res.json({
-        success: true,
-        message: `OTP sent to ${user.email}`
-    });
 };
 
 // RESET PASSWORD
