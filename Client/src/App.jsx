@@ -12,9 +12,9 @@ function App(){
     <ToastContainer/>
     <Routes>
         <Route path="/" element={<Home/>}/>
-        <Route path="Login" element={<Login/>}/>
-        <Route path="Email_verify" element={<Email_verify/>}/>
-        <Route path="Reset_password" element={<Reset_password/>}/>
+        <Route path="/Login" element={<Login/>}/>
+        <Route path="/Email_verify" element={<Email_verify/>}/>
+        <Route path="/Reset_password" element={<Reset_password/>}/>
     </Routes>
 
 
