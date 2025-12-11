@@ -17,7 +17,7 @@ function Navbar() {
     try {
       const { data } = await axios.post(
         backendurl + "/api/auth/sendverifyotp",
-        { userid: userdata._id }, // CRITICAL FIX
+        { userid: userdata._id },
         { withCredentials: true }
       );
 
@@ -53,18 +53,17 @@ function Navbar() {
 
   return (
     <div className="w-full flex justify-between p-4 sm:p-6 sm:px-24 absolute top-0 items-center">
-
       <img src={assets.logo} alt="" className="w-28 sm:w-32" />
 
       {userdata ? (
         <div className="w-10 h-10 flex items-center justify-center rounded-full bg-black text-white font-bold relative group">
-          {userdata.name[0].toUpperCase()}
+          {userdata?.name?.[0]?.toUpperCase()}
 
-          <div className="absolute top-7 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-200 
-            opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-opacity duration-200 z-20">
-
+          <div
+            className="absolute top-7 mt-2 w-40 bg-white rounded-xl shadow-lg border border-gray-200 
+            opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-opacity duration-200 z-20"
+          >
             <ul className="flex flex-col text-sm text-gray-700">
-
               {!userdata.isaccountverify && (
                 <li
                   onClick={sendverifyotp}
@@ -80,7 +79,6 @@ function Navbar() {
               >
                 Logout
               </li>
-
             </ul>
           </div>
         </div>
