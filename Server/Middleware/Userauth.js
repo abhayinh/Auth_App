@@ -10,10 +10,12 @@ const userauth = (req, res, next) => {
       });
     }
 
+    // FIXED: correct variable name
     const decoded = jwt.verify(token, process.env.JWT_TOKEN);
-    // add user id into request body for downstream controllers
-    req.body = req.body || {};
-    req.body.userid = decoded.id;
+
+    // FIXED: attach userid correctly
+    req.userid = decoded.id;
+
     next();
   } catch (error) {
     return res.status(401).json({
