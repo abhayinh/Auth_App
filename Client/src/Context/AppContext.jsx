@@ -9,7 +9,7 @@ export const AppContextProvider = ({ children }) => {
   const [userdata, setuserdata] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // set global withCredentials so cookies are always sent
+  // default to send cookies on every request
   axios.defaults.withCredentials = true;
 
   const getuserdata = async () => {
@@ -27,7 +27,6 @@ export const AppContextProvider = ({ children }) => {
 
   const getauth = async () => {
     try {
-      // IMPORTANT: your router exposes GET /api/auth/islogin (protected)
       const { data } = await axios.get(`${backendurl}/api/auth/islogin`);
       if (data.success) {
         setislogin(true);
@@ -56,7 +55,7 @@ export const AppContextProvider = ({ children }) => {
     userdata,
     setuserdata,
     getuserdata,
-    loading,
+    loading
   };
 
   return (

@@ -1,29 +1,26 @@
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 
 const userauth = (req, res, next) => {
-  const { token } = req.cookies
-
-  if (!token) {
-    return res.json({
-      success: false,
-      message: "User is Invalid Or user Does not exists"
-    })
-  }
-
   try {
-    const decodetoken = jwt.verify(token, process.env.JWT_TOKEN)
+    const token = req.cookies?.token;
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "User is invalid or token missing"
+      });
+    }
 
-    
-    req.body = req.body || {}
-    req.body.userid = decodetoken.id
-
-    next()
+    const decoded = jwt.verify(token, process.env.JWT_TOKEN);
+    // add user id into request body for downstream controllers
+    req.body = req.body || {};
+    req.body.userid = decoded.id;
+    next();
   } catch (error) {
-    return res.json({
+    return res.status(401).json({
       success: false,
-      message: `There is something wrong here: ${error.message}`
-    })
+      message: `Authentication error: ${error.message}`
+    });
   }
-}
+};
 
-export default userauth
+export default userauth;
