@@ -20,12 +20,13 @@ const userdata= async(req,res)=>{
     }
 
         return res.json({
-        success:true,
-        userdata:{
-            name:user.name,
-            isaccountverify:user.isaccountverify
-        }
-    })
+    success:true,
+    userdata:{
+        _id: user._id,  // ADD THIS LINE
+        name:user.name,
+        isaccountverify:user.isaccountverify
+    }
+})
 
     } catch (error) {
         res.json({

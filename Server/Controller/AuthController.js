@@ -119,7 +119,7 @@ export const logout = (req, res) => {
 
 
 
-// SEND VERIFY OTP
+// SEND VERIFY OTP - FIXED
 export const sendverifyotp = async (req, res) => {
     try {
         const { userid } = req.body;
@@ -133,9 +133,10 @@ export const sendverifyotp = async (req, res) => {
             });
         }
 
-        const otp = String(Math.floor(100000 + Math.random() * 900000));
+        // Generate OTP as number, then convert to string
+        const otp = Math.floor(100000 + Math.random() * 900000);
 
-        user.verifyotp = otp;
+        user.verifyotp = String(otp);  // FIXED: Convert to string
         user.verify_otp_extpiry = Date.now() + 24 * 60 * 60 * 1000;
 
         await user.save();
@@ -156,7 +157,7 @@ export const sendverifyotp = async (req, res) => {
 
 
 
-// VERIFY EMAIL OTP
+// VERIFY EMAIL OTP - FIXED
 export const verifyemail = async (req, res) => {
     const { userid, otp } = req.body;
 
@@ -171,7 +172,8 @@ export const verifyemail = async (req, res) => {
             return res.json({ success: false, message: "User not found" });
         }
 
-        if (!user.verifyotp || user.verifyotp !== otp) {
+        // FIXED: Ensure type matching for comparison
+        if (!user.verifyotp || user.verifyotp !== String(otp)) {
             return res.json({ success: false, message: "Incorrect OTP" });
         }
 
@@ -205,7 +207,7 @@ export const isauthenticated = (req, res) => {
 
 
 
-// SEND RESET OTP
+// SEND RESET OTP - FIXED
 export const sendresetotp = async (req, res) => {
     const { email } = req.body;
 
@@ -222,7 +224,7 @@ export const sendresetotp = async (req, res) => {
 
         const otp = Math.floor(100000 + Math.random() * 900000);
 
-        user.resetotp = otp;
+        user.resetotp = String(otp);  // FIXED: Convert to string
         user.resetotpexpiryat = Date.now() + 15 * 60 * 1000;
 
         await user.save();
@@ -243,7 +245,7 @@ export const sendresetotp = async (req, res) => {
 
 
 
-// RESET PASSWORD
+// RESET PASSWORD - FIXED
 export const reset_password = async (req, res) => {
     const { otp, email, newpassword } = req.body;
 
@@ -258,7 +260,8 @@ export const reset_password = async (req, res) => {
             return res.json({ success: false, message: "User not found" });
         }
 
-        if (!user.resetotp || user.resetotp !== otp) {
+        // FIXED: Ensure type matching for comparison
+        if (!user.resetotp || user.resetotp !== String(otp)) {
             return res.json({ success: false, message: "Invalid OTP" });
         }
 
