@@ -107,7 +107,7 @@ function Login() {
           </div>
 
           <p
-            onClick={() => navigate("/Reset_password")}
+            onClick={() => navigate("/reset_password")}
             className="mb-4 text-indigo-500 cursor-pointer"
           >
             Forgot password?

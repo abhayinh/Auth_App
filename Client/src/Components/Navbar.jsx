@@ -26,7 +26,7 @@ function Navbar() {
 
       if (data.success) {
         toast.success(data.message);
-        navigate("/Email_verify");
+        navigate("/email_verify");
       } else {
         toast.error(data.message || "Unable to send verification OTP");
       }
