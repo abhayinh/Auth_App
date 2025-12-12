@@ -22,7 +22,7 @@ function Email_verify() {
     e.preventDefault();
     const otp = inputrefs.current.map(i => i.value).join("");
     try {
-      const { data } = await axios.post(`${backendurl}/api/auth/verifyaccount`, { userid: userdata?._id, otp });
+      const { data } = await axios.post(`${backendurl}/api/auth/verifyaccount`, { otp });
       if (data.success) {
         toast.success(data.message);
         await getuserdata();
