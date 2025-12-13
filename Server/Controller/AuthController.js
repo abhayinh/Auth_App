@@ -115,22 +115,16 @@ export const sendverifyotp = async (req, res) => {
     user.verify_otp_extpiry = Date.now() + 24 * 60 * 60 * 1000;
     await user.save();
 
-    try {
-      const info = await transporter.sendMail({
-        from: `"Auth App" <${process.env.SENDER_EMAIL}>`,
+    transporter.sendMail({
+        from: process.env.SENDER_EMAIL,
         to: user.email,
         subject: "Verify your email",
-        html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp),
-      });
-
-      console.log("EMAIL SENT:", info.messageId);
-    } catch (error) {
-      console.error("SMTP ERROR:", error);
-      return res.json({
-        success: false,
-        message: "Failed to send email. Check SMTP config.",
-      });
-    }
+        html: EMAIL_VERIFY_TEMPLATE.replace("{{otp}}", otp).replace(
+          "{{email}}",
+          user.email
+        ),
+      })
+      .catch(() => {});
 
     return res.json({ success: true, message: "OTP sent successfully" });
   } catch (err) {
